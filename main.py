@@ -8,6 +8,13 @@ from functools import partial
 from discord.ext import commands
 from datetime import datetime, timedelta
 
+# อันนี้ ไม่ต้องสนใจครับ เป็น library ไว้แอบ token
+import os
+from dotenv import load_dotenv  # มีไว้แอบ token ครับ 4 บรรทัดนี้ ไม่งั้นเดี๋ยวมันไม่ให้ผมเอาโค้ดลง github
+load_dotenv()
+token = os.getenv('TOKEN')
+#############################################
+
 # wrapper / decorator
 
 message_lastseen = datetime.now()
@@ -285,4 +292,4 @@ async def leave(ctx):
     
 
 
-bot.run('ODA5NzAxODgwMDMyMjY0MjE0.YCY7ow.6T4k0xWCOC9FHDurXiPvqtvAldQ')
+bot.run(token)
