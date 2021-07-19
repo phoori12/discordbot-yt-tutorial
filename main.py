@@ -7,6 +7,7 @@ from async_timeout import timeout
 from functools import partial
 from discord.ext import commands
 from datetime import datetime, timedelta
+import itertools
 
 # อันนี้ ไม่ต้องสนใจครับ เป็น library ไว้แอบ token
 import os
@@ -163,6 +164,7 @@ class MusicPlayer:
 
     async def destroy(self, guild):
         """Disconnect and cleanup the player."""
+        del players[self._guild]
         await self._guild.voice_client.disconnect()
         return self.bot.loop.create_task(self._cog.cleanup(guild))
 
@@ -287,9 +289,43 @@ async def resume(ctx):
 
 @bot.command()
 async def leave(ctx):
+    del players[ctx.guild.id]
     await ctx.voice_client.disconnect()
 
-    
 
+@bot.command()
+async def queueList(ctx):
+    voice_client = get(bot.voice_clients, guild=ctx.guild)
+
+    if voice_client == None or not voice_client.is_connected():
+        await ctx.channel.send("Bot is not connected to vc", delete_after=10)
+        return
+    
+    player = get_player(ctx)
+    if player.queue.empty():
+        return await ctx.send('There are currently no more queued songs')
+    
+    # 1 2 3
+    upcoming = list(itertools.islice(player.queue._queue,0,player.queue.qsize()))
+    fmt = '\n'.join(f'**`{_["title"]}`**' for _ in upcoming)
+    embed = discord.Embed(title=f'Upcoming - Next {len(upcoming)}', description=fmt)
+    await ctx.send(embed=embed)
+
+@bot.command()
+async def skip(ctx):
+    voice_client = get(bot.voice_clients, guild=ctx.guild)
+
+    if voice_client == None or not voice_client.is_connected():
+        await ctx.channel.send("Bot is not connected to vc", delete_after=10)
+        return
+
+    if voice_client.is_paused():
+        pass
+    elif not voice_client.is_playing():
+        return
+
+    voice_client.stop()
+    await ctx.send(f'**`{ctx.author}`**: Skipped the song!')
+    
 
 bot.run(token)
