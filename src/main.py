@@ -3,14 +3,18 @@ from discord.utils import get
 from discord.ext import commands
 from datetime import datetime, timedelta
 from songs import songAPI 
+from binance.spot import Spot
 
 # อันนี้ ไม่ต้องสนใจครับ เป็น library ไว้แอบ token
 import os
 from dotenv import load_dotenv  # มีไว้แอบ token ครับ 4 บรรทัดนี้ ไม่งั้นเดี๋ยวมันไม่ให้ผมเอาโค้ดลง github
 load_dotenv()
 token = os.getenv('TOKEN')
+api_key = os.getenv('APIKEY')
+api_sec = os.getenv('API_SECRET')
 #############################################
 
+binanceClient = Spot(key=api_key, secret=api_sec)
 # wrapper / decorator 
 
 message_lastseen = datetime.now()
@@ -90,6 +94,10 @@ async def queueList(ctx):
 @bot.command()
 async def skip(ctx):
     await songsInstance.skip(ctx)
-    
+
+@bot.command()
+async def showprice(ctx):
+    print(binanceClient.ticker_price("BTCUSDT"))
+    await ctx.channel.send(binanceClient.ticker_price("BTCUSDT"))
 
 bot.run(token)
