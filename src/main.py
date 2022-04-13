@@ -3,18 +3,18 @@ from discord.utils import get
 from discord.ext import commands
 from datetime import datetime, timedelta
 from songs import songAPI 
-from binance.spot import Spot
+from crypto import crpytoAlertAPI
+
 
 # อันนี้ ไม่ต้องสนใจครับ เป็น library ไว้แอบ token
 import os
 from dotenv import load_dotenv  # มีไว้แอบ token ครับ 4 บรรทัดนี้ ไม่งั้นเดี๋ยวมันไม่ให้ผมเอาโค้ดลง github
 load_dotenv()
 token = os.getenv('TOKEN')
-api_key = os.getenv('APIKEY')
-api_sec = os.getenv('API_SECRET')
+
 #############################################
 
-binanceClient = Spot(key=api_key, secret=api_sec)
+
 # wrapper / decorator 
 
 message_lastseen = datetime.now()
@@ -23,6 +23,7 @@ message2_lastseen = datetime.now()
 bot = commands.Bot(command_prefix='!',help_command=None)
 
 songsInstance = songAPI()
+cryptoInstance = crpytoAlertAPI(bot)
 
 @bot.event
 async def on_ready():
@@ -96,8 +97,19 @@ async def skip(ctx):
     await songsInstance.skip(ctx)
 
 @bot.command()
-async def showprice(ctx):
-    print(binanceClient.ticker_price("BTCUSDT"))
-    await ctx.channel.send(binanceClient.ticker_price("BTCUSDT"))
+async def showprice(ctx, currency):
+    price = cryptoInstance.getPrice(currency)
+    if price == -999:
+        await ctx.channel.send("Pair not found")
+    else:
+        await ctx.channel.send(price["symbol"] + ": {:.4f}".format(float(price["price"])))
+
+@bot.command()
+async def setAlert(ctx, currency, price):
+    await cryptoInstance.setAlert(ctx, currency,price) 
+
+@bot.command()
+async def showAlerts(ctx):
+    await cryptoInstance.showAlerts(ctx) 
 
 bot.run(token)
