@@ -97,19 +97,12 @@ async def skip(ctx):
     await songsInstance.skip(ctx)
 
 @bot.command()
-async def showprice(ctx, currency):
-    price = cryptoInstance.getPrice(currency)
-    if price == -999:
-        await ctx.channel.send("Pair not found")
-    else:
-        await ctx.channel.send(price["symbol"] + ": {:.4f}".format(float(price["price"])))
-
-@bot.command()
 async def setAlert(ctx, currency, price):
-    await cryptoInstance.setAlert(ctx, currency,price) 
+     await cryptoInstance.setAlert(ctx, currency, price)
 
 @bot.command()
 async def showAlerts(ctx):
-    await cryptoInstance.showAlerts(ctx) 
+     await cryptoInstance.showAlerts(ctx)   
+
 
 bot.run(token)
